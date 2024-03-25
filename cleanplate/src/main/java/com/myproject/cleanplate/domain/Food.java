@@ -16,7 +16,7 @@ public class Food extends AuditingFields{
     @Id
     private String foodName;
 
-    @Setter @ManyToOne(optional = false) @JoinColumn(name = " userId")
+    @Setter @ManyToOne(optional = false) @JoinColumn(name = "userId")
     private UserAccount userAccount;
 
     @Setter @Column(nullable = false)
@@ -26,11 +26,11 @@ public class Food extends AuditingFields{
     private String storage;
 
     @Setter @Column(nullable = false)
-    private Date expiration;
+    private String expiration;
 
     protected Food(){}
 
-    private Food(String foodName, UserAccount userAccount, String category, String storage, Date expiration) {
+    private Food(String foodName, UserAccount userAccount, String category, String storage, String expiration) {
         this.foodName = foodName;
         this.userAccount = userAccount;
         this.category = category;
@@ -38,7 +38,7 @@ public class Food extends AuditingFields{
         this.expiration = expiration;
     }
 
-    public static Food of(String foodName, UserAccount userAccount, String category, String storage, Date expiration){
+    public static Food of(String foodName, UserAccount userAccount, String category, String storage, String expiration){
         return new Food(foodName, userAccount, category, storage, expiration);
     }
 
