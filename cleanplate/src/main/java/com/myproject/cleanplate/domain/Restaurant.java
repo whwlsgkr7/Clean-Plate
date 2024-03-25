@@ -17,37 +17,41 @@ import java.util.Objects;
 })
 @Entity
 public class Restaurant {
-    @Id
+    @Id @Column(length = 50)
     private String address;
 
-    @Setter @Column(nullable = false)
+    @Setter @ManyToOne @JoinColumn(name = " userId")
+    private UserAccount userAccount;
+
+    @Setter @Column(nullable = false, length=50)
     private String restaurantName;
 
-    @Setter @Column(nullable = false)
+    @Setter @Column(nullable = false, length=20)
     private String phoneNumber;
 
-    @Setter @Column(nullable = false)
+    @Setter @Column(nullable = false, length=20)
     private String sanitaryGrade;
 
-    @Setter @Column(nullable = false)
-    private String exemplaryRestaurant;
+    @Setter @Column(nullable = false, length = 20)
+    private String assignYMD;
 
-    @Setter @Column(nullable = false)
-    private String safeRestaurant;
+    @Setter @Column(nullable = false, length = 20)
+    private String presidentName;
 
     protected Restaurant(){}
 
-    private Restaurant(String address, String restaurantName, String phoneNumber, String sanitaryGrade, String exemplaryRestaurant, String safeRestaurant) {
+    private Restaurant(String address, UserAccount userAccount, String restaurantName, String phoneNumber, String sanitaryGrade, String assignYMD, String presidentName) {
         this.address = address;
+        this.userAccount = userAccount;
         this.restaurantName = restaurantName;
         this.phoneNumber = phoneNumber;
         this.sanitaryGrade = sanitaryGrade;
-        this.exemplaryRestaurant = exemplaryRestaurant;
-        this.safeRestaurant = safeRestaurant;
+        this.assignYMD = assignYMD;
+        this.presidentName = presidentName;
     }
 
-    public  static Restaurant of(String address, String restaurantName, String phoneNumber, String sanitaryGrade, String exemplaryRestaurant, String safeRestaurant){
-        return new Restaurant(address, restaurantName, phoneNumber, sanitaryGrade, exemplaryRestaurant, safeRestaurant);
+    public  static Restaurant of(String address, UserAccount userAccount, String restaurantName, String phoneNumber, String sanitaryGrade, String assignYMD, String presidentName){
+        return new Restaurant(address, userAccount, restaurantName, phoneNumber, sanitaryGrade, assignYMD, presidentName);
     }
 
     @Override
