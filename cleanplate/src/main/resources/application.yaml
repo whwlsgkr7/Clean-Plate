@@ -1,10 +1,10 @@
-#spring.application.name=cleanplate
 debug: false
-management.endpoints.web.exposure.include: "*" # spring Boot Actuator? ?? ?????? ??? ??
+management.endpoints.web.exposure.include: "*" # spring Boot Actuator의 모든 엔드포인트를 웹에서 노출
+
 
 logging:
   level:
-    com.myproject.cleanplate: debug
+    com.myproject.board: debug
     org.springframework.web.servlet: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 
@@ -14,8 +14,20 @@ spring:
     url: jdbc:mysql://localhost:3306/clean_plate
     username: jinhak
     password: 9943
+   
   jpa:
     open-in-view: false
-    defer-datasource-initialization: true # data.sql? ??
-    show-sql: true    # ??? ??? ??
-    hibernate.ddl-auto: create # DB ?? ???
+    defer-datasource-initialization: true # data.sql가 실행
+    show-sql: true    # 쿼리를 콘솔에 출력
+    hibernate.ddl-auto: create # DB 자동 초기화
+    # create : 기존 테이블 삭제 후 새로운 테이블 생성
+    # create-drop : create와 동일. 단, 종료시 테이블 삭제
+    # update : 기존 테이블을 삭제하지 않고, 변경 사항(컬럼 추가)만 적용(개발)
+    # validate : 엔티티와 테이블의 매핑 확인(운영)
+    # none : 사용하지 않음(운영)
+    properties:
+      hibernate.format_sql: true # 콘솔에 출력되는 쿼리를 보기 좋게 포맷팅
+      hibernate.default_batch_fetch_size: 100
+
+  sql.init.mode: always
+
