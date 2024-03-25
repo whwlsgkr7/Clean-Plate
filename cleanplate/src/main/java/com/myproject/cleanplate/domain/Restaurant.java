@@ -9,18 +9,12 @@ import java.util.Objects;
 
 @Getter
 @ToString(callSuper = true)
-@Table(indexes = {
-        @Index(columnList = "sanitaryGrade"),
-        @Index(columnList = "exemplaryRestaurant"),
-        @Index(columnList = "safeRestaurant"),
-        @Index(columnList = "address")
-})
 @Entity
 public class Restaurant {
-    @Id @Column(length = 50)
+    @Id
     private String address;
 
-    @Setter @ManyToOne @JoinColumn(name = " userId")
+    @Setter @ManyToOne @JoinColumn(name = "userId")
     private UserAccount userAccount;
 
     @Setter @Column(nullable = false, length=50)
@@ -35,7 +29,7 @@ public class Restaurant {
     @Setter @Column(nullable = false, length = 20)
     private String assignYMD;
 
-    @Setter @Column(nullable = false, length = 20)
+    @Setter @Column(nullable = false, length = 50)
     private String presidentName;
 
     protected Restaurant(){}
