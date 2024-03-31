@@ -17,7 +17,7 @@ public class RestaurantService {
 
     public void saveRestaurant(RestaurantDto dto) {
         try {
-            restaurantRepository.save(dto.toEntity(dto));
+            restaurantRepository.save(dto.toEntity());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
