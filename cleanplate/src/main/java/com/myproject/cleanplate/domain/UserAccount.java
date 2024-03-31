@@ -1,12 +1,13 @@
 package com.myproject.cleanplate.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @ToString(callSuper = true)
@@ -15,6 +16,17 @@ import java.util.Objects;
 public class UserAccount extends AuditingFields{
     @Id
     private String userId;
+
+    @ToString.Exclude
+    @JsonManagedReference
+    @OneToMany(mappedBy = "userAccount", cascade = CascadeType.ALL)
+    private List<Food> foodList = new ArrayList<>();
+
+    @ToString.Exclude
+    @OrderBy("address")
+    @JsonManagedReference
+    @OneToMany(mappedBy = "userAccount", cascade = CascadeType.ALL)
+    private List<Restaurant> restaurantList = new ArrayList<>();
 
     @Setter @Column(nullable = false)
     private String pwd;
@@ -45,11 +57,11 @@ public class UserAccount extends AuditingFields{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UserAccount that)) return false;
-        return Objects.equals(userId, that.userId) && Objects.equals(email, that.email);
+        return userId != null && userId.equals(that.getUserId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, email);
+        return Objects.hash(userId);
     }
 }

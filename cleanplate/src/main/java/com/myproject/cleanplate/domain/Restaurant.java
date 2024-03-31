@@ -1,8 +1,10 @@
 package com.myproject.cleanplate.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -14,7 +16,7 @@ public class Restaurant {
     @Id
     private String address;
 
-    @Setter @ManyToOne @JoinColumn(name = "userId")
+    @Setter @ManyToOne(optional=false, fetch=FetchType.EAGER) @JoinColumn(name = "userId") @JsonBackReference
     private UserAccount userAccount;
 
     @Setter @Column(nullable = false, length=50)
@@ -52,7 +54,7 @@ public class Restaurant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Restaurant that)) return false;
-        return address != null &&address.equals(that.getAddress());
+        return address != null && address.equals(that.getAddress());
     }
 
     @Override
