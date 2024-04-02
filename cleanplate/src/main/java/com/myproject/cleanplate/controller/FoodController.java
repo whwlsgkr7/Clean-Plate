@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +37,18 @@ public class FoodController {
             list = foodService.searchSavedFoods(userId);
 
         } catch (Exception e){
+            e.printStackTrace();
+        }
+        return list;
+
+    }
+
+    @GetMapping("/searchExpiration")
+    public List<FoodDto> searchExpiration(){
+        List<FoodDto> list = null;
+        try{
+            list = foodService.searchExpiration();
+        } catch(Exception e){
             e.printStackTrace();
         }
         return list;

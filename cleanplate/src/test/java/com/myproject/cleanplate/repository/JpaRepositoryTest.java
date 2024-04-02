@@ -37,6 +37,6 @@ public class JpaRepositoryTest {
         // Then
         assertThat(food)
                 .isNotNull()
-                .hasSize(1);
+                .hasSize(5);
     }
 }
