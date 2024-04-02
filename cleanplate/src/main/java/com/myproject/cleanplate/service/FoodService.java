@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,11 @@ public class FoodService {
     public List<FoodDto> searchSavedFoods(String userId){
 
         return foodRepository.findByUserAccount_UserId(userId).stream().map(FoodDto::from).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true) @Scheduled(fixedRate = 1000)
+    public List<FoodDto> searchExpiration() {
+        return foodRepository.findByExpirationWithinThreeDays().stream().map(FoodDto::from).collect(Collectors.toList());
     }
 
 //    @Transactional(readOnly = true)
