@@ -29,7 +29,7 @@ public class FoodService {
 
     public void saveFood(FoodDto dto){
         try {
-            UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().userId());
+            UserAccount userAccount = userAccountRepository.getReferenceById(dto.userAccountDto().username());
             foodRepository.save(dto.toEntity(userAccount));
         } catch (Exception e) {
             log.warn("음식 저장 실패. 음식 저장에 필요한 정보를 찾을 수 없습니다 - {}", e.getLocalizedMessage());
@@ -39,7 +39,7 @@ public class FoodService {
     @Transactional(readOnly = true)
     public List<FoodDto> searchSavedFoods(String userId){
 
-        return foodRepository.findByUserAccount_UserId(userId).stream().map(FoodDto::from).collect(Collectors.toList());
+        return foodRepository.findByUserAccount_Username(userId).stream().map(FoodDto::from).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true) @Scheduled(fixedRate = 1000)
@@ -55,7 +55,7 @@ public class FoodService {
 
     public void updateFood(FoodDto dto) throws Exception {
         // 사용자 ID로 해당 사용자의 모든 Food 엔티티를 조회
-        List<Food> foods = foodRepository.findByUserAccount_UserIdAndFoodName(dto.userAccountDto().userId(), dto.foodName());
+        List<Food> foods = foodRepository.findByUserAccount_UsernameAndFoodName(dto.userAccountDto().username(), dto.foodName());
 
         for (Food food : foods) {
             if (dto.expiration() != null) {
@@ -76,7 +76,7 @@ public class FoodService {
 
 
     public void deleteFood(String userId, String foodName) throws Exception{
-        foodRepository.deleteByUserAccount_UserIdAndFoodName(userId, foodName);
+        foodRepository.deleteByUserAccount_UsernameAndFoodName(userId, foodName);
 
     }
 }

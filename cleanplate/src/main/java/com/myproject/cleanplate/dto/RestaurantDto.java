@@ -21,6 +21,16 @@ public record RestaurantDto(String address,
         return new RestaurantDto(address, null, restaurantName, phoneNumber, sanitaryGrade, assignYMD, presidentName);
     }
 
+    public static RestaurantDto from(Restaurant entity){
+        return new RestaurantDto(entity.getAddress(),
+                UserAccountDto.from(entity.getUserAccount()),
+                entity.getRestaurantName(),
+                entity.getPhoneNumber(),
+                entity.getSanitaryGrade(),
+                entity.getAssignYMD(),
+                entity.getPresidentName());
+    }
+
     public Restaurant toEntity() {
         return Restaurant.of(address, null, restaurantName, phoneNumber, sanitaryGrade, assignYMD, presidentName);
     }

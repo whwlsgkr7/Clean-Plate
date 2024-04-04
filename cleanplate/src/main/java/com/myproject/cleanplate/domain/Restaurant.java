@@ -16,7 +16,7 @@ public class Restaurant {
     @Id
     private String address;
 
-    @Setter @ManyToOne(optional=false, fetch=FetchType.EAGER) @JoinColumn(name = "userId") @JsonBackReference
+    @Setter @ManyToOne(fetch=FetchType.EAGER) @JoinColumn(name = "username") @JsonBackReference
     private UserAccount userAccount;
 
     @Setter @Column(nullable = false, length=50)
