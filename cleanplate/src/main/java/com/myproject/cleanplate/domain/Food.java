@@ -17,7 +17,7 @@ public class Food extends AuditingFields{
     @Id
     private String foodName;
 
-    @Setter @ManyToOne(optional=false, fetch=FetchType.EAGER) @JoinColumn(name = "userId") @JsonBackReference
+    @Setter @ManyToOne(optional=false, fetch=FetchType.EAGER) @JoinColumn(name = "username") @JsonBackReference
     private UserAccount userAccount;
 
     @Setter @Column(nullable = false)

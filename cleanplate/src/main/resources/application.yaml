@@ -19,7 +19,7 @@ spring:
     open-in-view: true
     defer-datasource-initialization: true # data.sql가 실행
     show-sql: true    # 쿼리를 콘솔에 출력
-    hibernate.ddl-auto: create # DB 자동 초기화
+    hibernate.ddl-auto: update # DB 자동 초기화
     # create : 기존 테이블 삭제 후 새로운 테이블 생성
     # create-drop : create와 동일. 단, 종료시 테이블 삭제
     # update : 기존 테이블을 삭제하지 않고, 변경 사항(컬럼 추가)만 적용
@@ -31,7 +31,13 @@ spring:
 
   sql.init.mode: always # data.sql을 언제 작동시킬것인가
 
+jwt:
+  secret-key: "cleanplateqqqqqqqapplication2024secretkeyqqqqqqqqqqqqq"
+  token.expired-time-ms: 2592000000
+
 --- # 새로운 document
 
 spring:
   config.activate.on-profile: testdb
+
+

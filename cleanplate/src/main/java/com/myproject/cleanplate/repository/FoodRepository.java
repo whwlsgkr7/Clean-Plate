@@ -16,11 +16,11 @@ import java.util.List;
 @RepositoryRestResource
 public interface FoodRepository extends JpaRepository<Food, String>, FoodRepositoryCustom {
 
-    List<Food> findByUserAccount_UserId(String userId);
-    List<Food> findByUserAccount_UserIdAndFoodName(String userId, String foodName);
+    List<Food> findByUserAccount_Username(String userId);
+    List<Food> findByUserAccount_UsernameAndFoodName(String userId, String foodName);
     List<Food> findByExpirationWithinThreeDays();
 
-    void deleteByUserAccount_UserIdAndFoodName(String userId, String foodName);
+    void deleteByUserAccount_UsernameAndFoodName(String userId, String foodName);
 
 
 }

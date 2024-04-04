@@ -14,8 +14,8 @@ import java.util.Objects;
 @Getter
 @Entity
 public class UserAccount extends AuditingFields{
-    @Id
-    private String userId;
+    @Id @Setter
+    private String username;
 
     @ToString.Exclude
     @JsonManagedReference
@@ -29,7 +29,10 @@ public class UserAccount extends AuditingFields{
     private List<Restaurant> restaurantList = new ArrayList<>();
 
     @Setter @Column(nullable = false)
-    private String pwd;
+    private String password;
+
+    @Column(nullable = false) @Setter
+    private String role;
 
     @Setter @Column(nullable = false)
     private String nickName;
@@ -40,28 +43,29 @@ public class UserAccount extends AuditingFields{
     @Setter
     private String address;
 
-    protected UserAccount(){}
-    private UserAccount(String userId, String pwd, String nickName, String email, String address) {
-        this.userId = userId;
-        this.pwd = pwd;
+    public UserAccount(){}
+    private UserAccount(String username, String password, String role, String nickName, String email, String address) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
         this.nickName = nickName;
         this.email = email;
         this.address = address;
     }
 
-    public static UserAccount of(String userId, String pwd, String nickName, String email, String address){
-        return new UserAccount(userId, pwd, nickName, email, address);
+    public static UserAccount of(String username, String password, String role, String nickName, String email, String address){
+        return new UserAccount(username, password, role, nickName, email, address);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UserAccount that)) return false;
-        return userId != null && userId.equals(that.getUserId());
+        return username != null && username.equals(that.getUsername());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId);
+        return Objects.hash(username);
     }
 }
