@@ -58,9 +58,9 @@ public class SecurityConfig {
 
         //경로별 인가 작업
         http
-                .authorizeHttpRequests()
-                        .antMatchers("/users/join", "/login").permitAll()
-                        .anyRequest().authenticated();
+                .authorizeHttpRequests().antMatchers("/**").permitAll(); // 개발 중이라서 잠시 모든 경로를 모든 사용자에게 허용
+//                        .antMatchers("/users/join", "/login").permitAll()
+//                        .anyRequest().authenticated();
 
         //JWTFilter 등록
         http

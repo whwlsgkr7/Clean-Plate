@@ -12,8 +12,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/clean_plate
-    username: jinhak
-    password: 9943
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
    
   jpa:
     open-in-view: true
@@ -34,6 +34,10 @@ spring:
 jwt:
   secret-key: "cleanplateqqqqqqqapplication2024secretkeyqqqqqqqqqqqqq"
   token.expired-time-ms: 2592000000
+
+public:
+  data:
+    api-key: ${PUBLIC_DATA_API-KEY}
 
 --- # 새로운 document
 
