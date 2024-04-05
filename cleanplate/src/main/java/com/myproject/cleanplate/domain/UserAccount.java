@@ -22,11 +22,11 @@ public class UserAccount extends AuditingFields{
     @OneToMany(mappedBy = "userAccount", cascade = CascadeType.ALL)
     private List<Food> foodList = new ArrayList<>();
 
-    @ToString.Exclude
-    @OrderBy("address")
-    @JsonManagedReference
-    @OneToMany(mappedBy = "userAccount", cascade = CascadeType.ALL)
-    private List<Restaurant> restaurantList = new ArrayList<>();
+//    @ToString.Exclude
+//    @OrderBy("address")
+//    @JsonManagedReference
+//    @OneToMany(mappedBy = "userAccount", cascade = CascadeType.ALL)
+//    private List<Restaurant> restaurantList = new ArrayList<>();
 
     @Setter @Column(nullable = false)
     private String password;

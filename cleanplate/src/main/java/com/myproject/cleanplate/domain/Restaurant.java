@@ -16,8 +16,8 @@ public class Restaurant {
     @Id
     private String address;
 
-    @Setter @ManyToOne(fetch=FetchType.EAGER) @JoinColumn(name = "username") @JsonBackReference
-    private UserAccount userAccount;
+//    @Setter @ManyToOne(fetch=FetchType.EAGER) @JoinColumn(name = "username") @JsonBackReference
+//    private UserAccount userAccount;
 
     @Setter @Column(nullable = false, length=50)
     private String restaurantName;
@@ -36,9 +36,9 @@ public class Restaurant {
 
     protected Restaurant(){}
 
-    private Restaurant(String address, UserAccount userAccount, String restaurantName, String phoneNumber, String sanitaryGrade, String assignYMD, String presidentName) {
+    private Restaurant(String address, String restaurantName, String phoneNumber, String sanitaryGrade, String assignYMD, String presidentName) {
         this.address = address;
-        this.userAccount = userAccount;
+//        this.userAccount = userAccount;
         this.restaurantName = restaurantName;
         this.phoneNumber = phoneNumber;
         this.sanitaryGrade = sanitaryGrade;
@@ -46,8 +46,8 @@ public class Restaurant {
         this.presidentName = presidentName;
     }
 
-    public  static Restaurant of(String address, UserAccount userAccount, String restaurantName, String phoneNumber, String sanitaryGrade, String assignYMD, String presidentName){
-        return new Restaurant(address, userAccount, restaurantName, phoneNumber, sanitaryGrade, assignYMD, presidentName);
+    public  static Restaurant of(String address, String restaurantName, String phoneNumber, String sanitaryGrade, String assignYMD, String presidentName){
+        return new Restaurant(address, restaurantName, phoneNumber, sanitaryGrade, assignYMD, presidentName);
     }
 
     @Override
