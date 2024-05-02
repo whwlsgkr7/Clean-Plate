@@ -1,11 +1,14 @@
 package com.myproject.cleanplate.service;
 
 import com.myproject.cleanplate.CleanplateApplication;
+import com.myproject.cleanplate.domain.Alarm;
 import com.myproject.cleanplate.domain.Food;
 import com.myproject.cleanplate.domain.UserAccount;
+import com.myproject.cleanplate.dto.AlarmDto;
 import com.myproject.cleanplate.dto.FoodDto;
 import com.myproject.cleanplate.dto.UserAccountDto;
 import com.myproject.cleanplate.dto.response.UserJoinResponse;
+import com.myproject.cleanplate.repository.AlarmRepository;
 import com.myproject.cleanplate.repository.UserAccountRepository;
 import com.myproject.cleanplate.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -24,6 +28,7 @@ import java.util.Optional;
 public class UserAccountService {
 
     private final UserAccountRepository userAccountRepository;
+    private final AlarmRepository alarmRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Value("${jwt.secret-key}")
@@ -42,6 +47,12 @@ public class UserAccountService {
         // 회원가입 진행
         UserAccount userAccount = userAccountRepository.save(UserAccount.of(username, encoder.encode(password), role, nickName, email, address));
         return UserJoinResponse.from(userAccount);
+    }
+
+    public List<AlarmDto> alarmList(String username) throws Exception{
+        UserAccount userAccount = userAccountRepository.findByUsername(username);
+
+        return alarmRepository.findAllByUsername(userAccount).stream().map(AlarmDto::fromEntity).collect(Collectors.toList());
     }
 
 //    public String login(String username, String password) throws Exception{

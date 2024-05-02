@@ -31,10 +31,10 @@ public class FoodController {
     }
 
     @GetMapping("/searchFoodList")
-    public List<FoodDto> searchFoodList(String userId){
+    public List<FoodDto> searchFoodList(String username){
         List<FoodDto> list = null;
         try{
-            list = foodService.searchSavedFoods(userId);
+            list = foodService.searchSavedFoods(username);
 
         } catch (Exception e){
             e.printStackTrace();
@@ -80,10 +80,10 @@ public class FoodController {
 
     }
 
-    @DeleteMapping("/deleteFood/{userId}/{foodName}")
-    public ResponseEntity<?> deleteFood(@PathVariable String userId, @PathVariable String foodName){
+    @DeleteMapping("/deleteFood/{username}/{foodName}")
+    public ResponseEntity<?> deleteFood(@PathVariable String username, @PathVariable String foodName){
         try {
-            foodService.deleteFood(userId, foodName);
+            foodService.deleteFood(username, foodName);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("error");
