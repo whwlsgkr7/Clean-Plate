@@ -14,32 +14,46 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.http.HttpHeaders;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtils jwtTokenUtils;
 
+    private final static List<String> TOKEN_IN_PARAM_URLS = List.of("/users/alarm/subscribe");
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        //request에서 Authorization 헤더를 찾음
-        String authorization= request.getHeader("Authorization");
+        final String token;
 
-        //Authorization 헤더 검증
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
 
-            System.out.println("token null");
-            filterChain.doFilter(request, response);
+        if(TOKEN_IN_PARAM_URLS.contains(request.getRequestURI())){
+            token = request.getQueryString().split("=")[1].trim();
+        }
+        else{
+            //request에서 Authorization 헤더를 찾음
+            String authorization= request.getHeader("Authorization");
 
-            //조건이 해당되면 메소드 종료 (필수)
-            return;
+            //Authorization 헤더 검증
+            if (authorization == null || !authorization.startsWith("Bearer ")) {
+
+                System.out.println("token null");
+                filterChain.doFilter(request, response);
+
+                //조건이 해당되면 메소드 종료 (필수)
+                return;
+            }
+            //Bearer 부분 제거 후 순수 토큰만 획득
+            token = authorization.split(" ")[1];
+
+            System.out.println("authorization now");
         }
 
-        System.out.println("authorization now");
-        //Bearer 부분 제거 후 순수 토큰만 획득
-        String token = authorization.split(" ")[1];
+
 
         //토큰 소멸 시간 검증
         if (jwtTokenUtils.isExpired(token)) {

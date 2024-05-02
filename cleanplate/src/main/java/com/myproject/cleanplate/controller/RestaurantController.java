@@ -7,12 +7,11 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,15 +23,18 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RequestMapping("/restaurant")
-@Controller
+@RestController
 public class RestaurantController {
     private final RestaurantService restaurantService;
+
+    @Value("${PUBLIC_DATA_API-KEY}")
+    String openapiURL;
 
     @GetMapping("/api")
     public ResponseEntity<?> loadJsonFromApi() {
         int pageSize = 1000; // 한 번에 요청할 데이터의 양
         int totalData = 100; // 전체 데이터의 양, 실제 API에서 제공하는 전체 데이터의 양을 기준으로 설정
-        String baseUrl = "http://openapi.foodsafetykorea.go.kr/api/1b31daf975174a4cb3ed/C004/json/";
+        String baseUrl = openapiURL;
 
         for (int i = 1; i <= totalData; i += pageSize) {
             String apiUrl = baseUrl + i + "/" + (i + pageSize - 1);
@@ -72,18 +74,40 @@ public class RestaurantController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error");
             }
         }
-        return ResponseEntity.ok().body("success");
+        return ResponseEntity.ok("success");
     }
 
-    @GetMapping("/searchRestaurant")
-    public List<RestaurantDto> searchByName(@RequestBody RestaurantDto dto){
+    @GetMapping("/sanitary")
+    public List<RestaurantDto> searchBySanitary(String sanitary){
         List<RestaurantDto> list = null;
         try {
-            list = restaurantService.searchRestaurant(dto);
+            list = restaurantService.searchBySanitary(sanitary);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
+    }
+
+    @GetMapping("/name")
+    public List<RestaurantDto> searchByName(String name){
+        List<RestaurantDto> list = null;
+        try {
+            list = restaurantService.searchByName(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @DeleteMapping("/deleteAll")
+    public ResponseEntity<?> deleteAll(){
+        try{
+            restaurantService.deleteAll();
+        } catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error");
+        }
+        return ResponseEntity.ok("success");
     }
 
 

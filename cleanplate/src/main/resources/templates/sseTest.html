@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SSE Example</title>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function () {
+            var eventSource = new EventSource(/*[[${@environment.getProperty('base.url')}]]*/ '/users/alarm2/subscribe');
+            eventSource.onmessage = function(event) {
+                console.log('New message:', event.data);
+                var messageContainer = document.getElementById('messages');
+                var message = document.createElement('div');
+                message.textContent = 'Message: ' + event.data;
+                messageContainer.appendChild(message);
+            };
+
+            eventSource.addEventListener('INIT', function(event) {
+                var initContainer = document.getElementById('init');
+                initContainer.textContent = 'Connected: ' + event.data;
+            });
+
+            eventSource.onerror = function(event) {
+                console.error('EventSource failed:', event);
+            };
+        });
+        /*]]>*/
+    </script>
+</head>
+<body>
+<h1>Server-Sent Events (SSE) Example</h1>
+<div id="init">Waiting for connection...</div>
+<div id="messages"></div>
+</body>
+</html>
