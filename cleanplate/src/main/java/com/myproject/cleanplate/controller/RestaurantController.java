@@ -27,14 +27,13 @@ import java.util.stream.Collectors;
 public class RestaurantController {
     private final RestaurantService restaurantService;
 
-    @Value("${PUBLIC_DATA_API-KEY}")
-    String openapiURL;
+    @Value("${publicData.secretKey}")
+    private String baseUrl;
 
     @GetMapping("/api")
     public ResponseEntity<?> loadJsonFromApi() {
         int pageSize = 1000; // 한 번에 요청할 데이터의 양
         int totalData = 100; // 전체 데이터의 양, 실제 API에서 제공하는 전체 데이터의 양을 기준으로 설정
-        String baseUrl = openapiURL;
 
         for (int i = 1; i <= totalData; i += pageSize) {
             String apiUrl = baseUrl + i + "/" + (i + pageSize - 1);

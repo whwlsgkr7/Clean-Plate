@@ -91,5 +91,16 @@ public class FoodController {
         return ResponseEntity.ok().body("success");
     }
 
+    @DeleteMapping("/deleteAll")
+    public ResponseEntity<?> deleteAll(){
+        try {
+            foodService.deleteAll();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok("success");
+    }
+
+
 
 }

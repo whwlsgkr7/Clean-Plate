@@ -4,14 +4,14 @@ management.endpoints.web.exposure.include: "*" # spring Boot Actuator의 모든 
 
 logging:
   level:
-    com.myproject.board: debug
+    com.myproject.cleanplate: debug
     org.springframework.web.servlet: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/clean_plate
+    url: jdbc:mysql://3.39.192.0:3306/clean_plate
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
    
@@ -28,16 +28,24 @@ spring:
     properties:
       hibernate.format_sql: true # 콘솔에 출력되는 쿼리를 보기 좋게 포맷팅
       hibernate.default_batch_fetch_size: 100
+      hibernate.dialect: org.hibernate.dialect.MySQL5Dialect
 
   sql.init.mode: always # data.sql을 언제 작동시킬것인가
 
 jwt:
-  secret-key: "cleanplateqqqqqqqapplication2024secretkeyqqqqqqqqqqqqq"
-  token.expired-time-ms: 2592000000
+  secret-key: ${JWT_SECRET-KEY}
+  expired-time-ms: ${JWT_EXPIREDTIME_MS}
 
-public:
-  data:
-    api-key: ${PUBLIC_DATA_API-KEY}
+publicData:
+    secretKey: ${PUBLIC_DATA_API-KEY}
+
+openai.url:
+  model: "https://api.openai.com/v1/models"
+  model-list: "https://api.openai.com/v1/models/"
+  legacy-prompt: "https://api.openai.com/v1/completions"
+  prompt: "https://api.openai.com/v1/chat/completions"
+
+openai.secretKey: ${OPENAI_SECRET-KEY}
 
 --- # 새로운 document
 
