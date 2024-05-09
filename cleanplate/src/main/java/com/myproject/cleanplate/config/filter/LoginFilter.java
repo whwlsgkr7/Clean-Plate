@@ -14,6 +14,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -65,5 +66,20 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
 
         response.setStatus(401);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8"); 
+
+        // JSON 형태의 오류 메시지 작성, \ 는 "를 문자열의 경계를 의미하는 것이 아니라, 문자열의 일부임을 알리는 역할
+        String errorMessage = "{\"error\": \"id 또는 비밀번호가 일치하지 않습니다.\"}";
+
+        // 응답 본문에 오류 메시지 쓰기
+        try {
+            ServletOutputStream out = response.getOutputStream();
+            out.write(errorMessage.getBytes("UTF-8"));
+            out.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
