@@ -43,7 +43,7 @@ public class FoodService {
         return foodRepository.findByUserAccount_UsernameOrderByExpirationAsc(username).stream().map(FoodDto::from).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true) @Scheduled(fixedRate = 1000)
+    @Transactional(readOnly = true)
     public List<FoodDto> searchExpiration() {
         return foodRepository.findByExpirationWithinThreeDays().stream().map(FoodDto::from).collect(Collectors.toList());
     }
@@ -96,5 +96,9 @@ public class FoodService {
     public void deleteFood(String username, String foodName) throws Exception{
         foodRepository.deleteByUserAccount_UsernameAndFoodName(username, foodName);
 
+    }
+
+    public void deleteAll() throws Exception{
+        foodRepository.deleteAll();
     }
 }
