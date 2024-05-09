@@ -67,7 +67,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         response.setStatus(401);
         response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8"); 
+        response.setCharacterEncoding("UTF-8");
 
         // JSON 형태의 오류 메시지 작성, \ 는 "를 문자열의 경계를 의미하는 것이 아니라, 문자열의 일부임을 알리는 역할
         String errorMessage = "{\"error\": \"id 또는 비밀번호가 일치하지 않습니다.\"}";

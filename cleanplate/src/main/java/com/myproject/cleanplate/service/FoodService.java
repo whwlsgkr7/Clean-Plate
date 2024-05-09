@@ -95,7 +95,6 @@ public class FoodService {
 
     public void deleteFood(String username, String foodName) throws Exception{
         foodRepository.deleteByUserAccount_UsernameAndFoodName(username, foodName);
-
     }
 
     public void deleteAll() throws Exception{
