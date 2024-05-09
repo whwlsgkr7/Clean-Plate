@@ -11,12 +11,14 @@ import com.myproject.cleanplate.util.ClassUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +34,7 @@ public class UserAccountController {
     public static Map<String, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
 
     @PostMapping("/join")
-    public UserJoinResponse join(@RequestBody UserAccountDto userAccountDto){
+    public ResponseEntity<?> join(@RequestBody UserAccountDto userAccountDto){
         UserJoinResponse userJoinResponse = null;
         System.out.println(userAccountDto.password());
         try {
@@ -43,9 +45,11 @@ public class UserAccountController {
                     userAccountDto.email(),
                     userAccountDto.address());
         } catch (Exception e) {
-            e.printStackTrace();
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
-        return userJoinResponse;
+        return new ResponseEntity<>(userJoinResponse, HttpStatus.OK) ;
     }
 
 
@@ -67,11 +71,24 @@ public class UserAccountController {
         String username = userDetails.getUsername();
         SseEmitter sseEmitter = notificationService.subscribe(username);
 
-        notificationService.notifyExpiration(username);
+        notificationService.notifyAllUsersExpiration();
 
         return sseEmitter;
 
     }
+
+
+
+//    @GetMapping("/alarm2/subscribe")
+//    public SseEmitter subscribe(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(required = false) String token) {
+//        String username = userDetails.getUsername();
+//        System.out.println("Received token: " + token); // 토큰 값 로그 출력
+//
+//        SseEmitter sseEmitter = notificationService.subscribe(username);
+//        notificationService.notifyAllUsersExpiration();
+//        return sseEmitter;
+//    }
+
 
 
 
