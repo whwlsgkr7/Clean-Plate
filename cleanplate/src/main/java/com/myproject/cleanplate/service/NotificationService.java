@@ -1,7 +1,9 @@
 package com.myproject.cleanplate.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myproject.cleanplate.controller.UserAccountController;
 import com.myproject.cleanplate.domain.UserAccount;
+import com.myproject.cleanplate.dto.CompletionDto;
 import com.myproject.cleanplate.dto.FoodDto;
 import com.myproject.cleanplate.repository.FoodRepository;
 import com.myproject.cleanplate.repository.UserAccountRepository;
@@ -13,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,21 +25,22 @@ import java.util.stream.Collectors;
 public class NotificationService {
     private final FoodRepository foodRepository;
     private final UserAccountRepository userRepository;
+    private final ChatGPTService chatGPTService;
 
-    // 메시지 알림
+
     public SseEmitter subscribe(String username) {
 
-        // 1. 현재 클라이언트를 위한 sseEmitter 객체 생성
+        // 1. SSE 연결의 타임아웃 시간을 설정
         SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
 
-        // 2. 연결
+        // 2. 연결 확인 이벤트 전송
         try {
             sseEmitter.send(SseEmitter.event().name("connect"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // 3. 저장
+        // 3. sseEmitters Map에 유저 이름과 해당 유저의 Emitter 정보 저장
         UserAccountController.sseEmitters.put(username, sseEmitter);
 
         // 4. 연결 종료 처리
@@ -49,18 +54,19 @@ public class NotificationService {
 
 
 
-    // 모든 사용자에 대한 소비기한 알림
+    // 모든 사용자를 한 명씩 알림 대상이 되는지 검증
     // @Scheduled 는 반환 타입이 void이고 매개변수가 없는 메서드에만 사용할 수 있다.
     @Transactional(readOnly = true)
-    @Scheduled(fixedRate = 1000) // 예: 10초마다 실행
+    @Scheduled(fixedRate = 10000) // 예: 10초마다 실행
     public void notifyAllUsersExpiration() {
         List<UserAccount> users = userRepository.findAll(); // 모든 사용자 가져오기
         for (UserAccount user : users) {
             notifyExpiration(user.getUsername()); // 각 사용자에 대해 알림
+            notifyRecipe(user.getUsername());
         }
     }
 
-    // 단일 사용자에 대한 소비기한 알림
+    // sseEmitters Map에 등록된 사용자인지 검증 후 소비기한이 3일이내인 경우 알림
     public void notifyExpiration(String receiver) {
         UserAccount user = userRepository.findByUsername(receiver);
         if (user == null) return;
@@ -83,6 +89,103 @@ public class NotificationService {
             }
         }
     }
+
+
+
+    public void notifyRecipe(String receiver) {
+        UserAccount user = userRepository.findByUsername(receiver);
+        if (user == null) return;
+        String username = user.getUsername();
+        List<FoodDto> expiringFoods = foodRepository.findByExpirationWithinThreeDays()
+                .stream()
+                .map(FoodDto::from)
+                .filter(food -> food.userAccountDto().username().equals(username))
+                .collect(Collectors.toList());
+
+        if (!expiringFoods.isEmpty()) {
+            String prompt = createPrompt(expiringFoods);
+            CompletionDto completionDto = new CompletionDto("gpt-3.5-turbo-instruct", prompt, 0, 1000);
+            Map<String, Object> recipeResponse = chatGPTService.legacyPrompt(completionDto);
+
+            String recipeMessage = "Recipe suggestions could not be retrieved.";
+            if (recipeResponse.containsKey("choices")) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) recipeResponse.get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    recipeMessage = (String) choices.get(0).get("text");
+                }
+            }
+
+            String jsonRecipe = formatRecipeAsJson(recipeMessage); // JSON으로 변환
+
+            if (UserAccountController.sseEmitters.containsKey(username)) {
+                SseEmitter sseEmitterReceiver = UserAccountController.sseEmitters.get(username);
+                try {
+                    sseEmitterReceiver.send(SseEmitter.event().name("recipeSuggestion").data(jsonRecipe));
+                } catch (Exception e) {
+                    UserAccountController.sseEmitters.remove(username);
+                }
+            }
+        }
+    }
+
+
+    private String formatRecipeAsJson(String recipe) {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> recipeMap = new HashMap<>();
+        recipeMap.put("recipe", recipe);
+
+        String jsonResult = "{}";
+        try {
+            jsonResult = mapper.writeValueAsString(recipeMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonResult;
+    }
+
+
+    private String createPrompt(List<FoodDto> expiringFoods) {
+        String ingredientList = expiringFoods.stream()
+                .map(FoodDto::foodName)
+                .collect(Collectors.joining(", "));
+        return "당신은 이제부터 세계 최고의 요리사입니다." + ingredientList + "를 이용하여 집에서 준비할 수 있는 간단한 레시피를 제안해주세요." +
+                "요리 이름, 재료, 요리 설명 순서대로 언급해주세요.";
+    }
+
+
+//    public void notifyRecipe(String receiver) {
+//        UserAccount user = userRepository.findByUsername(receiver);
+//        if (user == null) return;
+//        String username = user.getUsername();
+//        List<FoodDto> expiringFoods = foodRepository.findByExpirationWithinThreeDays()
+//                .stream()
+//                .map(FoodDto::from)
+//                .filter(food -> food.userAccountDto().username().equals(username))
+//                .collect(Collectors.toList());
+//
+//        if (!expiringFoods.isEmpty()) {
+//            String prompt = createPrompt(expiringFoods);
+//            CompletionDto completionDto = new CompletionDto("gpt-3.5-turbo-instruct", prompt, 0, 1000);
+//            Map<String, Object> recipeResponse = chatGPTService.legacyPrompt(completionDto);
+//
+//            // API에서 반환된 choices 배열 내의 첫 번째 객체에서 text 값을 추출
+//            List<Map<String, Object>> choices = (List<Map<String, Object>>) recipeResponse.get("choices");
+//            String recipeMessage = "Recipe suggestions could not be retrieved.";
+//            if (choices != null && !choices.isEmpty()) {
+//                recipeMessage = (String) choices.get(0).get("text");
+//            }
+//            System.out.println(recipeMessage);
+//
+//            if (UserAccountController.sseEmitters.containsKey(username)) {
+//                SseEmitter sseEmitterReceiver = UserAccountController.sseEmitters.get(username);
+//                try {
+//                    sseEmitterReceiver.send(SseEmitter.event().name("recipeSuggestion").data(recipeMessage));
+//                } catch (Exception e) {
+//                    UserAccountController.sseEmitters.remove(username);
+//                }
+//            }
+//        }
+//    }
 
 
 
@@ -121,21 +224,5 @@ public class NotificationService {
 //        }
 //    }
 
-    // 댓글 알림 - 게시글 작성자 에게
-//    public void notifyComment(Long postId) {
-//        Post post = postRepository.findById(postId).orElseThrow(
-//                () -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")
-//        );
-//
-//        Long userId = post.getUser().getId();
-//
-//        if (NotificationController.sseEmitters.containsKey(userId)) {
-//            SseEmitter sseEmitter = NotificationController.sseEmitters.get(userId);
-//            try {
-//                sseEmitter.send(SseEmitter.event().name("addComment").data("댓글이 달렸습니다."));
-//            } catch (Exception e) {
-//                NotificationController.sseEmitters.remove(userId);
-//            }
-//        }
-//    }
+
 }
