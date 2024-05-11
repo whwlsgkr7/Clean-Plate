@@ -2,30 +2,39 @@ package com.myproject.cleanplate.dto;
 
 import com.myproject.cleanplate.domain.Alarm;
 import com.myproject.cleanplate.domain.UserAccount;
-import com.myproject.cleanplate.domain.constant.AlarmArgs;
 import com.myproject.cleanplate.domain.constant.AlarmType;
 import lombok.Getter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
-public record AlarmResponse(Integer id,
+public record AlarmResponse(Long id,
                        AlarmType alarmType,
-//                       AlarmArgs alarmArgs,
                        String text,
-                       Timestamp createdAt,
-                       Timestamp modifiedAt,
-                       Timestamp removedAt
+                       LocalDateTime createdAt,
+                            LocalDateTime modifiedAt,
+                            LocalDateTime removedAt
 ) {
 
-    public static AlarmResponse fromEntity(Alarm alarm){
+    public static AlarmResponse fromDto(AlarmDto dto){
         return new AlarmResponse(
-                alarm.getId(),
-                alarm.getAlarmType(),
-//                alarm.getArgs(),
-                alarm.getAlarmType().getAlarmText(),
-                alarm.getCreatedAt(),
-                alarm.getModifiedAt(),
-                alarm.getRemovedAt()
+                dto.id(),
+                dto.alarmType(),
+                dto.alarmType().getAlarmText(),
+                dto.createdAt(),
+                dto.modifiedAt(),
+                dto.removedAt()
+        );
+    }
+
+    public static AlarmResponse fromEntity(Alarm Entity){
+        return new AlarmResponse(
+                Entity.getId(),
+                Entity.getAlarmType(),
+                Entity.getAlarmType().getAlarmText(),
+                Entity.getCreatedAt(),
+                Entity.getModifiedAt(),
+                Entity.getRemovedAt()
         );
     }
 }
