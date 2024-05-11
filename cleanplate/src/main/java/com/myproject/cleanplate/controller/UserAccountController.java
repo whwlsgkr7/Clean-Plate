@@ -69,7 +69,7 @@ public class UserAccountController {
         String username = userDetails.getUsername();
         SseEmitter sseEmitter = alarmService.subscribe(username);
 
-        alarmService.notifyAllUsersExpiration();
+        alarmService.notifyAllUsersExpirationAndRecipe();
 
         return sseEmitter;
 
