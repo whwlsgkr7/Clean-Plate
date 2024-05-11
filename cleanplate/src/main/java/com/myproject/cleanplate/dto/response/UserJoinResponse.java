@@ -17,8 +17,8 @@ public record UserJoinResponse(String username,
         return new UserJoinResponse(username, role, nickName, email, address);
     }
 
-    public static UserJoinResponse from(UserAccount userAccount){
-        return new UserJoinResponse(userAccount.getUsername(), userAccount.getRole(), userAccount.getNickName(), userAccount.getEmail(), userAccount.getAddress());
+    public static UserJoinResponse fromEntity(UserAccount entity){
+        return new UserJoinResponse(entity.getUsername(), entity.getRole(), entity.getNickName(), entity.getEmail(), entity.getAddress());
     }
 
 }

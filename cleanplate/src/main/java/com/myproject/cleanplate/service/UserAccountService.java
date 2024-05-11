@@ -5,10 +5,13 @@ import com.myproject.cleanplate.CleanplateApplication;
 import com.myproject.cleanplate.domain.Food;
 import com.myproject.cleanplate.domain.UserAccount;
 //import com.myproject.cleanplate.dto.AlarmDto;
+import com.myproject.cleanplate.dto.AlarmDto;
+import com.myproject.cleanplate.dto.AlarmResponse;
 import com.myproject.cleanplate.dto.FoodDto;
 import com.myproject.cleanplate.dto.UserAccountDto;
 import com.myproject.cleanplate.dto.response.UserJoinResponse;
 //import com.myproject.cleanplate.repository.AlarmRepository;
+import com.myproject.cleanplate.repository.AlarmRepository;
 import com.myproject.cleanplate.repository.UserAccountRepository;
 import com.myproject.cleanplate.util.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +31,7 @@ import java.util.stream.Collectors;
 public class UserAccountService {
 
     private final UserAccountRepository userAccountRepository;
-//    private final AlarmRepository alarmRepository;
+    private final AlarmRepository alarmRepository;
     private final BCryptPasswordEncoder encoder;
 
     @Value("${jwt.secret-key}")
@@ -46,8 +49,19 @@ public class UserAccountService {
 
         // 회원가입 진행
         UserAccount userAccount = userAccountRepository.save(UserAccount.of(username, encoder.encode(password), role, nickName, email, address));
-        return UserJoinResponse.from(userAccount);
+        return UserJoinResponse.fromEntity(userAccount);
     }
+
+    public List<AlarmResponse> alarmList(String username) throws Exception{
+        if(userAccountRepository.findByUsername(username) != null){
+            return alarmRepository.findAllByUserAccountUsername(username).stream().map(AlarmResponse::fromEntity).collect(Collectors.toList());
+        }
+        else{
+            throw new Exception("유저를 찾을 수 없습니다.");
+        }
+
+    }
+
 
 //    public List<AlarmDto> alarmList(String username) throws Exception{
 //        UserAccount userAccount = userAccountRepository.findByUsername(username);
