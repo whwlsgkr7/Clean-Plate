@@ -57,7 +57,6 @@ public class AlarmService {
 
 
     // 모든 사용자를 한 명씩 알림 대상이 되는지 검증
-    // @Scheduled 는 반환 타입이 void이고 매개변수가 없는 메서드에만 사용할 수 있다.
     @Scheduled(fixedRate = 30000) // 예: 10초마다 실행
     public void notifyAllUsersExpirationAndRecipe() {
         List<UserAccount> users = userRepository.findAll(); // 모든 사용자 가져오기

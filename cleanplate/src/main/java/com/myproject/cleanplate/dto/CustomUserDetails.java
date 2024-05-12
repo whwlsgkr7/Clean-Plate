@@ -1,69 +1,88 @@
 package com.myproject.cleanplate.dto;
 
 import com.myproject.cleanplate.domain.UserAccount;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
-@RequiredArgsConstructor
-public class CustomUserDetails implements UserDetails {
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    private final UserAccount userAccount;
+public record CustomUserDetails(String username,
+                                String password,
+                                Collection<? extends GrantedAuthority> authorities,
+                                String nickname,
+                                String email,
+                                String address) implements UserDetails {
 
+    public static CustomUserDetails of(String username, String password, String nickname, String email, String address){
+        Set<RoleType> roleTypes = Set.of(RoleType.USER);
 
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-
-        collection.add(new GrantedAuthority() {
-
-            @Override
-            public String getAuthority() {
-
-                return userAccount.getRole();
-            }
-        });
-
-        return collection;
+        return new CustomUserDetails(
+                username,
+                password,
+                roleTypes.stream()
+                        .map(RoleType::getName)
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toUnmodifiableSet()),
+                nickname,
+                email,
+                address
+        );
     }
 
-    @Override
-    public String getPassword() {
-
-        return userAccount.getPassword();
+    public static CustomUserDetails fromDto(UserAccountDto dto){
+        return CustomUserDetails.of(
+                dto.username(),
+                dto.password(),
+                dto.nickName(),
+                dto.email(),
+                dto.address()
+        );
     }
 
-    @Override
-    public String getUsername() {
-
-        return userAccount.getUsername();
+    public static CustomUserDetails fromEntity(UserAccount entity){
+        return CustomUserDetails.of(
+                entity.getUsername(),
+                entity.getPassword(),
+                entity.getNickName(),
+                entity.getEmail(),
+                entity.getAddress()
+        );
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-
-        return true;
-    }
 
     @Override
-    public boolean isAccountNonLocked() {
-
-        return true;
-    }
+    public Collection<? extends GrantedAuthority> getAuthorities() {return authorities;}
 
     @Override
-    public boolean isCredentialsNonExpired() {
-
-        return true;
-    }
+    public String getPassword() {return password;}
 
     @Override
-    public boolean isEnabled() {
+    public String getUsername() {return username;}
 
-        return true;
+    @Override
+    public boolean isAccountNonExpired() {return true;}
+
+    @Override
+    public boolean isAccountNonLocked() {return true;}
+
+    @Override
+    public boolean isCredentialsNonExpired() {return true;}
+
+    @Override
+    public boolean isEnabled() {return true;}
+
+    public enum RoleType {
+        USER("ROLE_USER");
+
+        @Getter
+        private final String name;
+
+        RoleType(String name) {
+            this.name = name;
+        }
     }
 }

@@ -64,12 +64,12 @@ public class SecurityConfig {
                 .antMatchers("/**").permitAll(); // 개발 중이라서 잠시 모든 경로를 모든 사용자에게 허용
 
 
-        //JWTFilter 등록
+        //JWTFilter 추가
         http
                 .addFilterBefore(new JwtTokenFilter(jwtTokenUtils), LoginFilter.class);
 
 
-        //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
+        //LoginFilter 추가
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtTokenUtils), UsernamePasswordAuthenticationFilter.class);
 
