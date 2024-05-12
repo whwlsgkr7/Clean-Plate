@@ -1,70 +1,73 @@
 package com.myproject.cleanplate.domain;
 
-import com.myproject.cleanplate.domain.constant.AlarmArgs;
 import com.myproject.cleanplate.domain.constant.AlarmType;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.Where;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Setter
 @Getter
 @Entity
-//@Table(name = "\"alarm\"", indexes = {
-//        @Index(name = "user_id_idx", columnList = "user_id")
-//})
-//@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-@SQLDelete(sql = "UPDATE \"alarm\" SET removed_at = NOW() WHERE id=?")
-@Where(clause = "removed_at is NULL")
-@NoArgsConstructor
+//@SQLDelete(sql = "UPDATE \'alarm\' SET removed_at = NOW() WHERE id=?")
+//@Where(clause = "removed_at is NULL")
 public class Alarm {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id = null;
+    private Long id;
 
     // 알람을 받은 사람
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username")
-    private UserAccount username;
+    private UserAccount userAccount;
 
+    // 어떤 알람인지 문자열로 저장, EnumType.ORDINAL로 설정할 경우 AlarmType에 선언되어 있는 순서가 저장
     @Enumerated(EnumType.STRING)
     private AlarmType alarmType;
 
-//    @Type(type = "json")
-//    @Column(columnDefinition = "json")
-//    private AlarmArgs args;
+    @Column(length = 2000)
+    private String content;
 
+
+    @CreatedDate
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column(name = "modified_at")
-    private Timestamp modifiedAt;
+    private LocalDateTime modifiedAt;
 
     @Column(name = "removed_at")
-    private Timestamp removedAt;
+    private LocalDateTime removedAt;
 
+    protected Alarm(){}
 
-    @PrePersist
-    void createAt() {
-        this.createdAt = Timestamp.from(Instant.now());
+    private Alarm(UserAccount userAccount, AlarmType alarmType, String content) {
+        this.userAccount = userAccount;
+        this.alarmType = alarmType;
+        this.content = content;
     }
 
-    @PreUpdate
-    void modifiedAt() {this.modifiedAt = Timestamp.from(Instant.now());}
+    public static Alarm of(UserAccount username, AlarmType alarmType, String content) {
+        return new Alarm(username, alarmType, content);
+    }
 
-    public static Alarm of(AlarmType alarmType, UserAccount username) {
-        Alarm entity = new Alarm();
-        entity.setAlarmType(alarmType);
-//        entity.setArgs(args);
-        entity.setUsername(username);
-        return entity;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Alarm alarm)) return false;
+        return id != null && id.equals(alarm.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userAccount, alarmType);
     }
 }

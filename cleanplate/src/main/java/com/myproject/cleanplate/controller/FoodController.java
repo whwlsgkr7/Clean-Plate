@@ -3,6 +3,7 @@ package com.myproject.cleanplate.controller;
 import com.myproject.cleanplate.domain.Food;
 import com.myproject.cleanplate.dto.FoodDto;
 import com.myproject.cleanplate.dto.UserAccountDto;
+import com.myproject.cleanplate.dto.response.FoodResponse;
 import com.myproject.cleanplate.service.FoodService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,8 @@ public class FoodController {
     }
 
     @GetMapping("/searchFoodList")
-    public List<FoodDto> searchFoodList(String username){
-        List<FoodDto> list = null;
+    public List<FoodResponse> searchFoodList(String username){
+        List<FoodResponse> list = null;
         try{
             list = foodService.searchSavedFoods(username);
 

@@ -4,6 +4,7 @@ import com.myproject.cleanplate.domain.Food;
 import com.myproject.cleanplate.domain.UserAccount;
 import com.myproject.cleanplate.dto.FoodDto;
 import com.myproject.cleanplate.dto.UserAccountDto;
+import com.myproject.cleanplate.dto.response.FoodResponse;
 import com.myproject.cleanplate.repository.FoodRepository;
 import com.myproject.cleanplate.repository.UserAccountRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +39,9 @@ public class FoodService {
     }
 
     @Transactional(readOnly = true)
-    public List<FoodDto> searchSavedFoods(String username){
+    public List<FoodResponse> searchSavedFoods(String username){
 
-        return foodRepository.findByUserAccount_UsernameOrderByExpirationAsc(username).stream().map(FoodDto::from).collect(Collectors.toList());
+        return foodRepository.findByUserAccount_UsernameOrderByExpirationAsc(username).stream().map(FoodResponse::fromEntity).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

@@ -1,26 +1,24 @@
 package com.myproject.cleanplate.controller;
 
-import com.myproject.cleanplate.domain.UserAccount;
+import com.myproject.cleanplate.dto.AlarmResponse;
 import com.myproject.cleanplate.dto.CustomUserDetails;
 import com.myproject.cleanplate.dto.UserAccountDto;
 import com.myproject.cleanplate.dto.response.UserJoinResponse;
 
-import com.myproject.cleanplate.service.NotificationService;
+import com.myproject.cleanplate.service.AlarmService;
 import com.myproject.cleanplate.service.UserAccountService;
-import com.myproject.cleanplate.util.ClassUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -30,7 +28,7 @@ public class UserAccountController {
 
     private final UserAccountService userAccountService;
 //    private final AlarmService alarmService;
-    private final NotificationService notificationService;
+    private final AlarmService alarmService;
     public static Map<String, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
 
     @PostMapping("/join")
@@ -69,12 +67,34 @@ public class UserAccountController {
     @GetMapping("/alarm2/subscribe")
     public SseEmitter subscribe(@AuthenticationPrincipal CustomUserDetails userDetails) {
         String username = userDetails.getUsername();
-        SseEmitter sseEmitter = notificationService.subscribe(username);
+        SseEmitter sseEmitter = alarmService.subscribe(username);
 
-        notificationService.notifyAllUsersExpiration();
+        alarmService.notifyAllUsersExpirationAndRecipe();
 
         return sseEmitter;
 
+    }
+
+    @GetMapping("alarmList")
+    public ResponseEntity<?> alarmList(String username){
+        try {
+            return ResponseEntity.ok(userAccountService.alarmList(username));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("alarm/deleteAll")
+    public ResponseEntity<?> alarmDeleteAll(){
+        try {
+            alarmService.deleteAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error");
+        }
+
+        return ResponseEntity.ok("success");
     }
 
 

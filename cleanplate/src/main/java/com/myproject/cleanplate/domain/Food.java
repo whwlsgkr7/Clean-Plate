@@ -14,7 +14,12 @@ import java.util.Objects;
 @Getter
 @Entity
 public class Food extends AuditingFields{
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
     private String foodName;
 
     @Setter @ManyToOne(optional=false, fetch=FetchType.EAGER) @JoinColumn(name = "username") @JsonBackReference
@@ -23,7 +28,7 @@ public class Food extends AuditingFields{
     @Setter @Column(nullable = false)
     private Integer quantity;
 
-    @Setter @Column(nullable = false)
+    @Column(nullable = false)
     private String category;
 
     @Setter @Column(nullable = false)
@@ -51,12 +56,12 @@ public class Food extends AuditingFields{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Food that)) return false;
-        return foodName != null && foodName.equals(that.getFoodName());
+        if (!(o instanceof Food food)) return false;
+        return id != null && id.equals(food.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(foodName);
+        return Objects.hash(id);
     }
 }
