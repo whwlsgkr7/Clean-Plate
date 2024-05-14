@@ -53,6 +53,16 @@ public record CustomUserDetails(String username,
         );
     }
 
+    public UserAccountDto toDto(){
+        return UserAccountDto.of(
+                username,
+                password,
+                nickname,
+                email,
+                address
+        );
+    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {return authorities;}
