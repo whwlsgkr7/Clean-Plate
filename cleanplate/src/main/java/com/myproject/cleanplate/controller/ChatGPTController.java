@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +50,7 @@ public class ChatGPTController {
     @PostMapping("/recommendRecipe")
     public ResponseEntity<Map<String, Object>> recommendRecipe(@RequestBody RecipeRequest recipeRequest) {
         String prompt = chatGPTService.createPromptUser(recipeRequest);
+
         // CompletionDto 객체 생성
         CompletionDto completionDto = CompletionDto.builder()
                 .model("gpt-3.5-turbo-instruct")
@@ -56,9 +58,30 @@ public class ChatGPTController {
                 .temperature(0)
                 .max_tokens(1000)
                 .build();
+
+        // chatGPTService 호출
         Map<String, Object> result = chatGPTService.legacyPrompt(completionDto);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+
+        // choices 배열에서 text 추출
+        if (result.containsKey("choices")) {
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) result.get("choices");
+            if (!choices.isEmpty() && choices.get(0).containsKey("text")) {
+                String text = (String) choices.get(0).get("text");
+
+                // 클라이언트에게 반환할 Map 생성
+                Map<String, Object> response = new HashMap<>();
+                response.put("alarm", text);
+
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }
+        }
+
+        // 실패 응답
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Failed to retrieve recipe.");
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 
 
 
