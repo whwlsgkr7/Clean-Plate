@@ -12,6 +12,7 @@ import org.springframework.data.querydsl.binding.QuerydslBindings;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import java.util.List;
+import java.util.Optional;
 
 @RepositoryRestResource
 public interface FoodRepository extends JpaRepository<Food, String>, FoodRepositoryCustom {
@@ -21,7 +22,8 @@ public interface FoodRepository extends JpaRepository<Food, String>, FoodReposit
     List<Food> findByUserAccount_UsernameAndFoodName(String userId, String foodName);
     List<Food> findByExpirationWithinThreeDays();
 
-    void deleteByUserAccount_UsernameAndFoodName(String username, String foodName);
+    void deleteById(Long foodId);
+    Food findById(Long foodId);
 
 
 }

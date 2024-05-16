@@ -4,7 +4,8 @@ import com.myproject.cleanplate.domain.Food;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-public record FoodResponse(String foodName,
+public record FoodResponse(Long id,
+                           String foodName,
                            Integer quantity,
                            String category,
                            String storage,
@@ -16,6 +17,7 @@ public record FoodResponse(String foodName,
 
     public static FoodResponse fromEntity(Food entity){
         return new FoodResponse(
+                entity.getId(),
                 entity.getFoodName(),
                 entity.getQuantity(),
                 entity.getCategory(),
