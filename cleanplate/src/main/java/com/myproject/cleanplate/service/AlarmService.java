@@ -57,7 +57,7 @@ public class AlarmService {
 
 
     // 모든 사용자를 한 명씩 알림 대상이 되는지 검증
-    @Scheduled(fixedRate = 30000) // 예: 10초마다 실행
+    @Scheduled(fixedRate = 500000) // 예: 10초마다 실행
     public void notifyAllUsersExpirationAndRecipe() {
         List<UserAccount> users = userRepository.findAll(); // 모든 사용자 가져오기
         for (UserAccount user : users) {
@@ -89,7 +89,7 @@ public class AlarmService {
                     // 알람 메세지 저장
                     alarmRepository.save(Alarm.of(user, AlarmType.EXPIRATION_WITHIN_THREEDAYS, message));
 
-                    String jsonMessage = formatRecipeAsJson(message);
+                    String jsonMessage = formatExpirationAsJson(message);
                     sseEmitterReceiver.send(SseEmitter.event().name("expirationAlert").data(jsonMessage));
 //                    sseEmitterReceiver.send(SseEmitter.event().name("userAlarmList").data(alarmRepository.findAllByUserAccountUsername(username)));
                 }
@@ -160,6 +160,20 @@ public class AlarmService {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, String> recipeMap = new HashMap<>();
         recipeMap.put("recipe", recipe);
+
+        String jsonResult = "{}";
+        try {
+            jsonResult = mapper.writeValueAsString(recipeMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jsonResult;
+    }
+
+    private String formatExpirationAsJson(String expiration) {
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> recipeMap = new HashMap<>();
+        recipeMap.put("Expiration", expiration);
 
         String jsonResult = "{}";
         try {

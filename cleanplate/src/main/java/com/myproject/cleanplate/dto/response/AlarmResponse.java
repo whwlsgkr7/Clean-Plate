@@ -9,8 +9,8 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 public record AlarmResponse(Long id,
-                       AlarmType alarmType,
-                       String text,
+                       String alarmType,
+                       String content,
                        LocalDateTime createdAt,
                             LocalDateTime modifiedAt,
                             LocalDateTime removedAt
@@ -20,7 +20,7 @@ public record AlarmResponse(Long id,
         return new AlarmResponse(
                 dto.id(),
                 dto.alarmType(),
-                dto.alarmType().getAlarmText(),
+                dto.content(),
                 dto.createdAt(),
                 dto.modifiedAt(),
                 dto.removedAt()
@@ -30,8 +30,8 @@ public record AlarmResponse(Long id,
     public static AlarmResponse fromEntity(Alarm Entity){
         return new AlarmResponse(
                 Entity.getId(),
-                Entity.getAlarmType(),
                 Entity.getAlarmType().getAlarmText(),
+                Entity.getContent(),
                 Entity.getCreatedAt(),
                 Entity.getModifiedAt(),
                 Entity.getRemovedAt()

@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 
 public record AlarmDto(Long id,
                        UserAccountDto userAccountDto,
-                       AlarmType alarmType,
-//                       AlarmArgs alarmArgs,
+                       String alarmType,
+                       String content,
                        LocalDateTime createdAt,
                        LocalDateTime modifiedAt,
                        LocalDateTime removedAt
@@ -21,7 +21,8 @@ public record AlarmDto(Long id,
         return new AlarmDto(
                 entity.getId(),
                 UserAccountDto.from(entity.getUserAccount()),
-                entity.getAlarmType(),
+                entity.getAlarmType().getAlarmText(),
+                entity.getContent(),
                 entity.getCreatedAt(),
                 entity.getModifiedAt(),
                 entity.getRemovedAt()
