@@ -4,6 +4,7 @@ import com.myproject.cleanplate.domain.Food;
 import com.myproject.cleanplate.domain.UserAccount;
 import com.myproject.cleanplate.dto.FoodDto;
 import com.myproject.cleanplate.dto.UserAccountDto;
+import com.myproject.cleanplate.dto.request.FoodRequest;
 import com.myproject.cleanplate.dto.response.FoodResponse;
 import com.myproject.cleanplate.repository.FoodRepository;
 import com.myproject.cleanplate.repository.UserAccountRepository;
@@ -26,7 +27,6 @@ import java.util.stream.Collectors;
 public class FoodService {
     private final FoodRepository foodRepository;
     private final UserAccountRepository userAccountRepository;
-//    private final AlarmService alarmService;
 
 
     public void saveFood(FoodDto dto){
@@ -44,58 +44,34 @@ public class FoodService {
         return foodRepository.findByUserAccount_UsernameOrderByExpirationAsc(username).stream().map(FoodResponse::fromEntity).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public List<FoodDto> searchExpiration() {
-        return foodRepository.findByExpirationWithinThreeDays().stream().map(FoodDto::from).collect(Collectors.toList());
-    }
-
+    // 테스트용
 //    @Transactional(readOnly = true)
-//    @Scheduled(fixedRate = 1000)
-//    public void checkAndNotifyExpiringFoods() {
-//        List<FoodDto> expiringFoods = foodRepository.findByExpirationWithinThreeDays()
-//                .stream()
-//                .map(FoodDto::from)
-//                .collect(Collectors.toList());
-//        for (FoodDto food : expiringFoods) {
-//            try {
-//                alarmService.send(1, food.userAccountDto().username(), food.foodName());
-//            } catch (Exception e) {
-//                log.error("Failed to send alarm for food: {}", food.foodName(), e);
-//            }
-//        }
+//    public List<FoodDto> searchExpiration() {
+//        return foodRepository.findByExpirationWithinThreeDays().stream().map(FoodDto::from).collect(Collectors.toList());
 //    }
 
-//    @Transactional(readOnly = true)
-//    public List<FoodDto> test(String userId, String foodName){
-//
-//        return foodRepository.findByUserAccount_UserIdAndFoodName(userId, foodName).stream().map(FoodDto::from).collect(Collectors.toList());
-//    }
 
-    // TODO: username 또는 foodName이 없을 경우 예외 던지기 처리하기
-    public void updateFood(FoodDto dto) throws Exception {
-        // 사용자 ID로 해당 사용자의 특정 food를 조회
-        List<Food> foods = foodRepository.findByUserAccount_UsernameAndFoodName(dto.userAccountDto().username(), dto.foodName());
 
-        for (Food food : foods) {
-            if (dto.expiration() != null) {
-                food.setExpiration(dto.expiration());
-            }
-            if (dto.storage() != null) {
-                food.setStorage(dto.storage());
-            }
-            if (dto.quantity() != null) {
-                food.setQuantity(dto.quantity());
-            }
+    public void updateFood(Long foodId, FoodDto dto) throws Exception {
+        Food food = foodRepository.findById(foodId);
+        UserAccount userAccount = userAccountRepository.findByUsername(dto.userAccountDto().username());
 
-            // 업데이트된 엔티티 저장
-            foodRepository.save(food);
 
+        if(food.getUserAccount().equals(userAccount)){
+            if(dto.quantity() != null) {food.setQuantity(dto.quantity());}
+            if(dto.storage() != null) {food.setStorage(dto.storage());}
+            if(dto.expiration() != null) {food.setExpiration(dto.expiration());}
         }
+        else{
+            throw new Exception("잘못된 foodId 입니다.");
+        }
+        foodRepository.save(food);
+
     }
 
 
-    public void deleteFood(String username, String foodName) throws Exception{
-        foodRepository.deleteByUserAccount_UsernameAndFoodName(username, foodName);
+    public void deleteFood(Long foodId) throws Exception{
+        foodRepository.deleteById(foodId);
     }
 
     public void deleteAll() throws Exception{
