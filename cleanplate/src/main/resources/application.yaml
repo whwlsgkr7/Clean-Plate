@@ -14,17 +14,14 @@ spring:
     url: jdbc:mysql://52.79.146.63:3306/clean_plate
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+
    
   jpa:
     open-in-view: true
     defer-datasource-initialization: true # data.sql가 실행
     show-sql: true    # 쿼리를 콘솔에 출력
     hibernate.ddl-auto: update # DB 자동 초기화
-    # create : 기존 테이블 삭제 후 새로운 테이블 생성
-    # create-drop : create와 동일. 단, 종료시 테이블 삭제
-    # update : 기존 테이블을 삭제하지 않고, 변경 사항(컬럼 추가)만 적용
-    # validate : 엔티티와 테이블의 매핑 확인
-    # none : 사용하지 않음
+
     properties:
       hibernate.format_sql: true # 콘솔에 출력되는 쿼리를 보기 좋게 포맷팅
       hibernate.default_batch_fetch_size: 100
@@ -36,8 +33,10 @@ jwt:
   secret-key: ${JWT_SECRET-KEY}
   expired-time-ms: ${JWT_EXPIREDTIME_MS}
 
+
 publicData:
     secretKey: ${PUBLIC_DATA_API-KEY}
+
 
 openai.url:
   model: "https://api.openai.com/v1/models"

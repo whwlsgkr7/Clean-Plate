@@ -55,105 +55,101 @@ public class AlarmService {
     }
 
 
-
-    // 모든 사용자를 한 명씩 알림 대상이 되는지 검증
-    @Scheduled(fixedRate = 500000) // 예: 10초마다 실행
+    // sseEmitters 맵에 저장된 사용자에게 특정 시간마다 알람 전송
+    @Scheduled(fixedRate = 500000) // 예: 5분마다 실행
     public void notifyAllUsersExpirationAndRecipe() {
-        List<UserAccount> users = userRepository.findAll(); // 모든 사용자 가져오기
-        for (UserAccount user : users) {
-            notifyExpiration(user.getUsername()); // 각 사용자에 대해 알림
-            notifyRecipe(user.getUsername());
+
+        for (String username : UserAccountController.sseEmitters.keySet()) {
+            notifyExpiration(username);
+            notifyRecipe(username);
+            notifyAlarmList(username);
         }
     }
 
-    // sseEmitters Map에 등록된 사용자인지 검증 후 소비기한이 3일이내인 경우 알림
+
+    // 소비기한이 3일이내인 경우 알림
     public void notifyExpiration(String receiver) {
-        // 알람 요청을 한 유저가 존재하는지 확인
-        UserAccount user = userRepository.findByUsername(receiver);
-        if (user == null) return;
-        String username = user.getUsername();
 
         // 소비기한이 3일 남은 음식 리스트를 구성하는 로직
         List<FoodDto> expiringFoods = foodRepository.findByExpirationWithinThreeDays()
                 .stream()
                 .map(FoodDto::from)
-                .filter(food -> food.userAccountDto().username().equals(username))
+                .filter(food -> food.userAccountDto().username().equals(receiver))
                 .collect(Collectors.toList());
 
-        if (UserAccountController.sseEmitters.containsKey(username)) {
-            // sseEmitters 맵에 해당 유저의 sseEmitter를 가져옴
-            SseEmitter sseEmitterReceiver = UserAccountController.sseEmitters.get(username);
-            try {
-                for (FoodDto food : expiringFoods) {
-                    String message = "주의: " + food.foodName() + "의 유통기한이 " + food.expiration() + "까지입니다.";
-                    // 알람 메세지 저장
-                    alarmRepository.save(Alarm.of(user, AlarmType.EXPIRATION_WITHIN_THREEDAYS, message));
+        // sseEmitters 맵에 해당 유저의 sseEmitter를 가져옴
+        SseEmitter sseEmitterReceiver = UserAccountController.sseEmitters.get(receiver);
+        try {
+            for (FoodDto food : expiringFoods) {
+                String message = "주의: " + food.foodName() + "의 유통기한이 " + food.expiration() + "까지입니다.";
+                String jsonMessage = formatExpirationAsJson(message);
+                sseEmitterReceiver.send(SseEmitter.event().name("expirationAlert").data(jsonMessage));
 
-                    String jsonMessage = formatExpirationAsJson(message);
-                    sseEmitterReceiver.send(SseEmitter.event().name("expirationAlert").data(jsonMessage));
-//                    sseEmitterReceiver.send(SseEmitter.event().name("userAlarmList").data(alarmRepository.findAllByUserAccountUsername(username)));
-                }
-            } catch (Exception e) {
-                UserAccountController.sseEmitters.remove(username);
+                // 알람 메세지 저장
+                alarmRepository.save(Alarm.of(userRepository.findByUsername(receiver), AlarmType.EXPIRATION_WITHIN_THREEDAYS, message));
+
             }
+        } catch (Exception e) {
+            UserAccountController.sseEmitters.remove(receiver);
         }
+
     }
 
 
 
     public void notifyRecipe(String receiver) {
-        // 알람 요청을 한 유저가 존재하는지 확인
-        UserAccount user = userRepository.findByUsername(receiver);
-        if (user == null) return;
-        String username = user.getUsername();
-
 
         // 소비기한이 3일 남은 음식 리스트를 구성하는 로직
         List<FoodDto> expiringFoods = foodRepository.findByExpirationWithinThreeDays()
                 .stream()
                 .map(FoodDto::from)
-                .filter(food -> food.userAccountDto().username().equals(username))
+                .filter(food -> food.userAccountDto().username().equals(receiver))
                 .collect(Collectors.toList());
 
+        if (!expiringFoods.isEmpty()) {
+            // 음식 리스트를 이용해 질문을 만들고 요청하는 로직
+            String prompt = createPrompt(expiringFoods);
+            CompletionDto completionDto = new CompletionDto("gpt-3.5-turbo-instruct", prompt, 0, 1000);
+            Map<String, Object> recipeResponse = chatGPTService.legacyPrompt(completionDto);
 
-        if (UserAccountController.sseEmitters.containsKey(username)) {
-            if (!expiringFoods.isEmpty()) {
-                // 음식 리스트를 이용해 질문을 만들고 요청하는 로직
-                String prompt = createPrompt(expiringFoods);
-                CompletionDto completionDto = new CompletionDto("gpt-3.5-turbo-instruct", prompt, 0, 1000);
-                Map<String, Object> recipeResponse = chatGPTService.legacyPrompt(completionDto);
-
-                // api 응답에서 레시피 추천 text를 뽑는 과정
-                String recipeMessage = "레시피 검색을 실패하였습니다.";
-                if (recipeResponse.containsKey("choices")) {
-                    List<Map<String, Object>> choices = (List<Map<String, Object>>) recipeResponse.get("choices");
-                    if (choices != null && !choices.isEmpty()) {
-                        recipeMessage = (String) choices.get(0).get("text");
-                        // 알람 메세지 저장
-                        alarmRepository.save(Alarm.of(user, AlarmType.RECIPE_RECOMMENDATION, recipeMessage));
-                    }
+            // api 응답에서 레시피 추천 text를 뽑는 과정
+            String recipeMessage = "레시피 검색을 실패하였습니다.";
+            if (recipeResponse.containsKey("choices")) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) recipeResponse.get("choices");
+                if (choices != null && !choices.isEmpty()) {
+                    recipeMessage = (String) choices.get(0).get("text");
+                    // 알람 메세지 저장
+                    alarmRepository.save(Alarm.of(userRepository.findByUsername(receiver), AlarmType.RECIPE_RECOMMENDATION, recipeMessage));
                 }
-
-                // 레시피 추천 메세지를 JSON으로 변환
-                String jsonRecipe = formatRecipeAsJson(recipeMessage);
-
-                SseEmitter sseEmitterReceiver = UserAccountController.sseEmitters.get(username);
-                try {
-                    sseEmitterReceiver.send(SseEmitter.event().name("recipeSuggestion").data(jsonRecipe));
-
-                    List<AlarmResponse> alarmResponse = alarmRepository.findAllByUserAccountUsername(username)
-                            .stream()
-                            .map(AlarmResponse::fromEntity)
-                            .collect(Collectors.toList());
-
-                    sseEmitterReceiver.send(SseEmitter.event().name("userAlarmList").data(alarmResponse));
-                } catch (Exception e) {
-                    UserAccountController.sseEmitters.remove(username);
-                }
-
             }
-        }
 
+            // 레시피 추천 메세지를 JSON으로 변환
+            String jsonRecipe = formatRecipeAsJson(recipeMessage);
+
+            SseEmitter sseEmitterReceiver = UserAccountController.sseEmitters.get(receiver);
+            try {
+                sseEmitterReceiver.send(SseEmitter.event().name("recipeSuggestion").data(jsonRecipe));
+            } catch (Exception e) {
+                UserAccountController.sseEmitters.remove(receiver);
+            }
+
+        }
+    }
+
+
+    public void notifyAlarmList(String receiver){
+        SseEmitter sseEmitterReceiver = UserAccountController.sseEmitters.get(receiver);
+
+        List<AlarmResponse> alarmResponse = alarmRepository.findAllByUserAccountUsername(receiver)
+                .stream()
+                .map(AlarmResponse::fromEntity)
+                .collect(Collectors.toList());
+
+        try {
+            sseEmitterReceiver.send(SseEmitter.event().name("userAlarmList").data(alarmResponse));
+        } catch (Exception e) {
+            UserAccountController.sseEmitters.remove(receiver);
+        }
     }
 
     private String formatRecipeAsJson(String recipe) {
