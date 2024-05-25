@@ -11,6 +11,11 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
+
+bootJar {
+    archiveFileName = 'app.jar'
+}
+
 repositories {
     mavenCentral()
 }

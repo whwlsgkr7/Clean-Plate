@@ -46,9 +46,7 @@ openai.url:
 
 openai.secretKey: ${OPENAI_SECRET-KEY}
 
---- # 새로운 document
 
-spring:
-  config.activate.on-profile: testdb
+
 
 
