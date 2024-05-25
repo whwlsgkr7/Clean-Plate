@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myproject.cleanplate.config.ChatGPTConfig;
 import com.myproject.cleanplate.dto.ChatCompletionDto;
+import com.myproject.cleanplate.dto.ChatRequestMsgDto;
 import com.myproject.cleanplate.dto.CompletionDto;
 import com.myproject.cleanplate.dto.FoodDto;
 import com.myproject.cleanplate.dto.request.RecipeRequest;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +120,7 @@ public class ChatGPTService {
     }
 
 
-    public String createPromptUser(RecipeRequest recipeRequest) {
+    public String createLegacyPromptUser(RecipeRequest recipeRequest) {
         String ingredientList = String.join(", ", recipeRequest.ingredients());
 
         // 요리 유형과 식단 제한을 포함한 추가적인 설명
@@ -158,5 +160,34 @@ public class ChatGPTService {
         }
         return resultMap;
     }
+
+
+    public List<ChatRequestMsgDto> createPromptUser(RecipeRequest recipeRequest) {
+        String ingredientList = String.join(", ", recipeRequest.ingredients());
+
+        // 요리 유형과 식단 제한을 포함한 추가적인 설명
+        String cuisineType = recipeRequest.cuisineType();
+        String dietaryRestrictions = String.join(", ", recipeRequest.dietaryRestrictions());
+
+
+        ChatRequestMsgDto chatRequestMsgDto = ChatRequestMsgDto.builder()
+                .role("system")
+                .content("당신은 이제부터 세계 최고의 요리사입니다. 다음 재료: " + ingredientList +
+                        "를 사용하여 " + (cuisineType.isEmpty() ? "" : cuisineType + " 스타일의 ") +
+                        "레시피를 제안해주세요." +
+                        (!dietaryRestrictions.isEmpty() ? " 다음 식단 제한을 고려하세요: " + dietaryRestrictions + "." : "") +
+                        " 요리 이름, 재료, 요리 설명(재료 준비 방법, 요리 과정) 각 구간으로 나눠서 순서대로 언급해주세요.  조리방 법에는 " +
+                        "각 과정에서 소제목과 조리 시간을 언급해주세요. 예를들면 해당 재료를 얼마나 익혀야하는지 불의 세기 등등.")
+                .build();
+
+        List<ChatRequestMsgDto> chatRequestMsgDtoList = new ArrayList<>();
+        chatRequestMsgDtoList.add(chatRequestMsgDto);
+
+        return chatRequestMsgDtoList;
+
+
+    }
+
+
 }
 
