@@ -14,6 +14,7 @@ import java.util.Objects;
 @Entity
 public class Restaurant {
     @Id
+    @Column(length = 200)
     private String address;
 
 //    @Setter @ManyToOne(fetch=FetchType.EAGER) @JoinColumn(name = "username") @JsonBackReference

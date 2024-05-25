@@ -15,6 +15,7 @@ import java.util.Objects;
 @Entity
 public class UserAccount extends AuditingFields{
     @Id @Setter
+    @Column(length = 100)
     private String username;
 
     @ToString.Exclude
