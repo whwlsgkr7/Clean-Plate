@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  cleanplate-database:
+    container_name: cleanplate-database
+    build:
+      dockerfile: Dockerfile
+      context: ./database
+    image: whwlsgkr7/cleanplate-database
+    environment:
+      - MYSQL_DATABASE=cleanplate
+      - MYSQL_ROOT_PASSWORD=${DATASOURCE_PASSWORD}
+    volumes:
+      - ./database/config:/etc/mysql/conf.d
+    ports:
+      - "3307:3306"
