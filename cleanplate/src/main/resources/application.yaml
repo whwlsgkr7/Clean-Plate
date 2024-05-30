@@ -79,7 +79,7 @@ spring:
       on-profile: prod
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://52.79.146.63:3307/cleanplate?createDatabaseIfNotExist=true
+    url: jdbc:mariadb://3.38.98.33:3307/cleanplate?createDatabaseIfNotExist=true
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
 
