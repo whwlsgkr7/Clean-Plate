@@ -3,6 +3,7 @@ package com.myproject.cleanplate.dto;
 import com.myproject.cleanplate.domain.Food;
 import com.myproject.cleanplate.domain.UserAccount;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -12,7 +13,7 @@ public record FoodDto(Long foodId,
                       Integer quantity,
                       String category,
                       String storage,
-                      Date expiration,
+                      LocalDate expiration,
                       LocalDateTime createdAt,
                       String createdBy,
                       LocalDateTime modifiedAt,
@@ -23,7 +24,7 @@ public record FoodDto(Long foodId,
                                    Integer quantity,
                                    String category,
                                    String storage,
-                                   Date expiration,
+                                   LocalDate expiration,
                                    LocalDateTime createdAt,
                                    String createdBy,
                                    LocalDateTime modifiedAt,
@@ -38,7 +39,7 @@ public record FoodDto(Long foodId,
                              Integer quantity,
                              String category,
                              String storage,
-                             Date expiration
+                             LocalDate expiration
     ){
         return new FoodDto(null, foodName, userAccountDto, quantity, category, storage, expiration, null, null, null, null);
     }
@@ -46,11 +47,12 @@ public record FoodDto(Long foodId,
 
     // 보관 음식 수정 용도
     public static FoodDto of(UserAccountDto userAccountDto,
+                             String foodName,
                              Integer quantity,
                              String storage,
-                             Date expiration
+                             LocalDate expiration
                              ){
-        return new FoodDto(null, null, userAccountDto, quantity, null, storage, expiration, null, null, null, null);
+        return new FoodDto(null, foodName, userAccountDto, quantity, null, storage, expiration, null, null, null, null);
     }
     public static FoodDto from(Food entity) {
         return new FoodDto(

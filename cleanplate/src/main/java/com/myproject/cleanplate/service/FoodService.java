@@ -58,6 +58,7 @@ public class FoodService {
 
 
         if(food.getUserAccount().equals(userAccount)){
+            if(dto.foodName() != null) {food.setFoodName(dto.foodName());}
             if(dto.quantity() != null) {food.setQuantity(dto.quantity());}
             if(dto.storage() != null) {food.setStorage(dto.storage());}
             if(dto.expiration() != null) {food.setExpiration(dto.expiration());}

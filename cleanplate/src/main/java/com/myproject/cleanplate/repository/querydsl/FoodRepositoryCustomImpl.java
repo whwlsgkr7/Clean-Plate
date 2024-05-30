@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -25,18 +26,15 @@ public class FoodRepositoryCustomImpl implements FoodRepositoryCustom {
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QFood food = QFood.food;
 
-        // 현재 날짜
+        // 현재 날짜와 시간
         LocalDate today = LocalDate.now();
 
         // 현재 날짜로부터 3일 후의 날짜
-        LocalDate threeDaysLater = LocalDate.now().plusDays(3);
+        LocalDate threeDaysLater = today.plusDays(3);
 
         // 오늘과 3일 후 사이에 유통기한이 있는 음식을 찾는다.
         return queryFactory.selectFrom(food)
-                .where(food.expiration.between(
-                        Date.from(today.atStartOfDay(ZoneId.systemDefault()).toInstant()),
-                        Date.from(threeDaysLater.atStartOfDay(ZoneId.systemDefault()).toInstant())
-                ))
+                .where(food.expiration.between(today, threeDaysLater))
                 .fetch();
     }
 }

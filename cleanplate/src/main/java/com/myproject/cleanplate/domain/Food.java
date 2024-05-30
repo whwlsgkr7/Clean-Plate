@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Objects;
@@ -19,7 +20,7 @@ public class Food extends AuditingFields{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Setter @Column(nullable = false)
     private String foodName;
 
     @Setter @ManyToOne(optional=false, fetch=FetchType.EAGER) @JoinColumn(name = "username") @JsonBackReference
@@ -35,11 +36,11 @@ public class Food extends AuditingFields{
     private String storage;
 
     @Setter @Column(nullable = false)
-    private Date expiration;
+    private LocalDate expiration;
 
     protected Food(){} // 모든 jpa entity는 기본 생성자를 가지고 있어야함.
 
-    private Food(String foodName, UserAccount userAccount, int quantity, String category, String storage, Date expiration) {
+    private Food(String foodName, UserAccount userAccount, int quantity, String category, String storage, LocalDate expiration) {
         this.foodName = foodName;
         this.userAccount = userAccount;
         this.quantity = quantity;
@@ -48,7 +49,7 @@ public class Food extends AuditingFields{
         this.expiration = expiration;
     }
 
-    public static Food of(String foodName, UserAccount userAccount, int quantity, String category, String storage, Date expiration){
+    public static Food of(String foodName, UserAccount userAccount, int quantity, String category, String storage, LocalDate expiration){
         return new Food(foodName, userAccount, quantity, category, storage, expiration);
     }
 
