@@ -76,7 +76,8 @@ public class UserAccountController {
     }
 
     @GetMapping("alarmList")
-    public ResponseEntity<?> alarmList(String username){
+    public ResponseEntity<?> alarmList(@AuthenticationPrincipal CustomUserDetails userDetails){
+        String username = userDetails.getUsername();
         try {
             return ResponseEntity.ok(userAccountService.alarmList(username));
         } catch (Exception e) {
