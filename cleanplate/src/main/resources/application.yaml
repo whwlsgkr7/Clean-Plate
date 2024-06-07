@@ -18,23 +18,23 @@ spring:
   config:
     active:
       on-profile: local
-#  datasource:
-#    driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://localhost:3307/cleanplate?createDatabaseIfNotExist=true
-#    username: ${DATASOURCE_USERNAME}
-#    password: ${DATASOURCE_PASSWORD}
-
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://52.79.146.63:3306/clean_plate
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3307/cleanplate?createDatabaseIfNotExist=true
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://52.79.146.63:3306/clean_plate
+#    username: ${DATASOURCE_USERNAME}
+#    password: ${DATASOURCE_PASSWORD}
 
   jpa:
     open-in-view: true
     defer-datasource-initialization: false # data.sql 이 실행
     show-sql: true
-    hibernate.ddl-auto: update
+    hibernate.ddl-auto: create
 
     properties:
       hibernate.format_sql: true # 콘솔에 출력되는 쿼리를 보기 좋게 포맷팅

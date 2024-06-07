@@ -1,29 +1,21 @@
 package com.myproject.cleanplate.service;
 
-import com.myproject.cleanplate.CleanplateApplication;
 //import com.myproject.cleanplate.domain.Alarm;
-import com.myproject.cleanplate.domain.Food;
 import com.myproject.cleanplate.domain.UserAccount;
 //import com.myproject.cleanplate.dto.AlarmDto;
-import com.myproject.cleanplate.dto.AlarmDto;
-import com.myproject.cleanplate.dto.AlarmResponse;
-import com.myproject.cleanplate.dto.FoodDto;
-import com.myproject.cleanplate.dto.UserAccountDto;
-import com.myproject.cleanplate.dto.response.UserJoinResponse;
+        import com.myproject.cleanplate.dto.AlarmResponse;
+        import com.myproject.cleanplate.dto.response.UserJoinResponse;
 //import com.myproject.cleanplate.repository.AlarmRepository;
 import com.myproject.cleanplate.repository.AlarmRepository;
 import com.myproject.cleanplate.repository.UserAccountRepository;
-import com.myproject.cleanplate.util.JwtTokenUtils;
-import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
-import org.springframework.beans.factory.annotation.Value;
+        import lombok.RequiredArgsConstructor;
+        import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+        import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
