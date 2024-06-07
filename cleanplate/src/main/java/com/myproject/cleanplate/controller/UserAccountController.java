@@ -6,7 +6,9 @@ import com.myproject.cleanplate.dto.UserAccountDto;
 import com.myproject.cleanplate.dto.response.UserJoinResponse;
 
 import com.myproject.cleanplate.service.AlarmService;
+import com.myproject.cleanplate.service.TokenService;
 import com.myproject.cleanplate.service.UserAccountService;
+import com.myproject.cleanplate.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +31,11 @@ import java.util.stream.Collectors;
 public class UserAccountController {
 
     private final UserAccountService userAccountService;
-//    private final AlarmService alarmService;
+    //    private final AlarmService alarmService;
     private final AlarmService alarmService;
     public static Map<String, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+
+    private final TokenService tokenService;
 
     @PostMapping("/join")
     public ResponseEntity<?> join(@RequestBody UserAccountDto userAccountDto){
@@ -49,6 +55,13 @@ public class UserAccountController {
         }
         return new ResponseEntity<>(userJoinResponse, HttpStatus.OK) ;
     }
+
+
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+        return tokenService.reissueToken(request, response);
+    }
+
 
 
 //    @GetMapping("/alarm2/subscribe/{username}")
