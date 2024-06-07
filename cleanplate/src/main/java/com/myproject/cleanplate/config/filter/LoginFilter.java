@@ -1,8 +1,10 @@
 package com.myproject.cleanplate.config.filter;
 
-import com.myproject.cleanplate.dto.CustomUserDetails;
-import com.myproject.cleanplate.util.JwtTokenUtils;
+import com.myproject.cleanplate.domain.RefreshToken;
+import com.myproject.cleanplate.repository.RefreshTokenRepository;
+import com.myproject.cleanplate.util.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,17 +14,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-    private final JwtTokenUtils jwtTokenUtils;
+    private final JwtUtils jwtUtils;
+    private final RefreshTokenRepository refreshTokenRepository;
 
 
     @Override
@@ -40,20 +45,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
 
-        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
-
-        String username = customUserDetails.username();
+        String username = authentication.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-
         String role = auth.getAuthority();
 
+        String access = jwtUtils.createJwt("access", username, role, 600000L);
+        String refresh = jwtUtils.createJwt("refresh", username, role, 86400000L);
 
-        String token = jwtTokenUtils.createJwt(username, role, 2592000000L);
+        // Refresh 토큰 DB에 저장
+        addRefreshToken(username, refresh, 86400000L);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        //응답 설정
+        response.setHeader("access", access);
+        response.addCookie(createCookie("refresh", refresh));
+        response.setStatus(HttpStatus.OK.value());
     }
 
 
@@ -77,5 +85,28 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private Cookie createCookie(String key, String value) {
+
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        //cookie.setSecure(true);
+        cookie.setPath("/users/reissue");
+        cookie.setHttpOnly(true);
+
+        return cookie;
+    }
+
+    private void addRefreshToken(String username, String refresh, Long expiredMs) {
+
+        Date date = new Date(System.currentTimeMillis() + expiredMs);
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUsername(username);
+        refreshToken.setRefresh(refresh);
+        refreshToken.setExpiration(date.toString());
+
+        refreshTokenRepository.save(refreshToken);
     }
 }
